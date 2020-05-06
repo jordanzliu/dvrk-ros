@@ -1,0 +1,65 @@
+<launch>
+
+  <arg name="arm" />   
+  <arg name="config" />   
+
+  <arg name="psm1_model" default="$(find dvrk_model)/model/PSM1.urdf.xacro" />
+  <arg name="ecm_model" default="$(find dvrk_model)/model/ECM.urdf.xacro" />
+
+  <node name="dvrk_PSM1_node"
+        pkg="dvrk_robot"
+        type="dvrk_console_json"        
+        args="-j $(find saw_intuitive_research_kit)/../share/console-PSM1_KIN_SIMULATED.json"                     
+        output="screen"/>
+
+  <group ns="/dvrk/PSM1">
+      <arg name="gui" default="false" />
+      <arg name="rate" default="20" />
+      
+      <param name="robot_description" command="rosrun xacro xacro $(arg psm1_model) prefix:=PSM1_"/>
+      <param name="use_gui" value="$(arg gui)"/>
+      <param name="rate" value="$(arg rate)"/>
+      
+      <rosparam param="source_list" subst_value="True">
+          [/dvrk/PSM1/state_joint_current,
+           /dvrk/PSM1/state_jaw_current,
+           /dvrk/PSM1/state_gripper_current]
+      </rosparam>
+
+      <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+      <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+  </group>
+
+  <node name="rviz" pkg="rviz" type="rviz"
+     args="-d $(find dvrk_model)/rviz_config/PSM1.rviz" />
+
+  <node name="dvrk_ECM_node"
+        pkg="dvrk_robot"
+        type="dvrk_console_json"        
+        args="-j $(find saw_intuitive_research_kit)/../share/console-ECM_KIN_SIMULATED.json"                     
+        output="screen"/>
+
+  <group ns="/dvrk/ECM">
+      <arg name="gui" default="false" />
+      <arg name="rate" default="20" />
+      
+      <param name="robot_description" command="rosrun xacro xacro $(arg ecm_model) prefix:=ECM_"/>
+      <param name="use_gui" value="$(arg gui)"/>
+      <param name="rate" value="$(arg rate)"/>
+      
+      <rosparam param="source_list" subst_value="True">
+          [/dvrk/ECM/state_joint_current,
+           /dvrk/ECM/state_jaw_current,
+           /dvrk/ECM/state_gripper_current]
+      </rosparam>
+
+      <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+      <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+  </group>
+
+  <node name="rviz1" pkg="rviz" type="rviz"
+     args="-d $(find dvrk_model)/rviz_config/ECM.rviz" />
+
+</launch>
+
+
